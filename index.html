@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Year 🤍 &Happy Birthday</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        hand: ['Caveat', 'cursive'],
+                    },
+                    colors: {
+                        cream: '#FDFBF7',
+                        softpink: '#FCE7F3',
+                        lavender: '#F3E8FF',
+                        peach: '#FFEDD5',
+                        textMain: '#44403C',
+                        textLight: '#78716C',
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); opacity: 0.6; }
+            50% { transform: translateY(-20px); opacity: 1; }
+            100% { transform: translateY(0px); opacity: 0.6; }
+        }
+        
+        @keyframes drift {
+            0% { transform: translateY(110vh) translateX(-10vw) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) translateX(10vw) rotate(20deg); opacity: 0; }
+        }
+
+        .particle {
+            position: absolute;
+            animation: drift linear forwards;
+            pointer-events: none;
+            z-index: 0;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .card {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            z-index: 1;
+        }
+
+        .card.active {
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 10;
+        }
+
+        .card.exit-anim {
+            animation: slideToBack 1.5s cubic-bezier(0.45, 0, 0.55, 1) forwards;
+            opacity: 1;
+            z-index: 20;
+        }
+
+        @keyframes slideToBack {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            40% { transform: translate(130%, -15%) rotate(25deg); }
+            50% { z-index: 0; }
+            100% { transform: translate(0, 0) rotate(0deg); z-index: 0; }
+        }
+
+        /* Fix for mobile photo scrolling */
+        .photo-scroll-container {
+            max-height: 65vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 10px;
+        }
+        .photo-scroll-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        .photo-scroll-container::-webkit-scrollbar-thumb {
+            background: rgba(251, 113, 133, 0.2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-rose-50 via-purple-50 to-orange-50 h-[100dvh] w-screen overflow-hidden text-textMain relative font-sans">
+
+    <div id="particles" class="absolute inset-0 overflow-hidden pointer-events-none z-0"></div>
+
+    <button id="music-toggle" class="fixed top-6 right-6 z-[110] p-3 bg-white/40 backdrop-blur-md rounded-full shadow-sm text-rose-400">
+        <i data-lucide="music" id="music-icon" class="w-5 h-5"></i>
+    </button>
+    
+    <div id="restart-container" class="fixed bottom-12 left-1/2 -translate-x-1/2 z-[110] hidden">
+        <button id="restart-btn" class="px-8 py-3 bg-white/90 backdrop-blur-md border border-rose-200 rounded-full text-rose-400 font-sans text-xs tracking-widest uppercase shadow-xl hover:scale-105 active:scale-95 transition-all">
+            Replay Your story ↺
+        </button>
+    </div>
+
+    <audio id="bg-music" loop>
+        <source src="SOFTLY (Official Music Video) KARAN AUJLA  IKKY  LATEST PUNJABI SONGS 2023 - Karan Aujla.mp3" type="audio/mpeg">
+    </audio>
+
+    <main class="relative z-10 w-full h-full flex items-center justify-center p-6 sm:p-12">
+        <div class="absolute top-6 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/30 rounded-full overflow-hidden backdrop-blur-sm">
+            <div id="progress" class="h-full bg-rose-300/60 w-0 transition-all duration-700 rounded-full"></div>
+        </div>
+
+        <div id="click-area" class="absolute inset-0 z-50 cursor-pointer"></div>
+
+        <div class="card active">
+            <div class="max-w-md text-center space-y-4">
+                <div class="inline-flex items-center justify-center p-3 rounded-full bg-white/40 backdrop-blur-md mb-4 shadow-sm animate-float">
+                    <i data-lucide="sparkles" class="w-6 h-6 text-yellow-500/80"></i>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-hand font-semibold text-stone-800 tracking-tight leading-tight">This is for you my love <3 💕💕</h1>
+                <p class="text-lg md:text-xl font-hand text-stone-600 mt-2">“ Chola Bhature!✨🤍”</p>
+            </div>
+        </div>
+
+        <div class="card"><div class="bg-pink-200/40 backdrop-blur-xl border border-pink-300/60 p-8 rounded-3xl shadow-2xl max-w-sm text-center text-rose-900"><i data-lucide="moon" class="w-8 h-8 text-indigo-400 mx-auto mb-6 opacity-80"></i><p class="text-2xl font-hand text-stone-700">“That random late night when a simple conversation somehow felt really meaningful 🌙”</p></div></div>
+        <div class="card"><div class="bg-gradient-to-br from-rose-200/40 to-orange-200/30 backdrop-blur-xl border border-rose-300/60 p-8 rounded-3xl shadow-2xl max-w-sm text-center text-rose-900"><i data-lucide="cloud-sun" class="w-8 h-8 text-sky-400 mx-auto mb-6 opacity-80"></i><p class="text-2xl font-hand text-stone-700">“Those overthinking days that slowly turned into calm and better moods ✨🙂”</p></div></div>
+        <div class="card"><div class="bg-rose-100/50 backdrop-blur-xl border border-rose-200/70 p-8 rounded-3xl shadow-xl max-w-sm text-center text-rose-800"><i data-lucide="heart-handshake" class="w-8 h-8 text-rose-400 mx-auto mb-6 opacity-80"></i><p class="text-2xl font-hand text-stone-700">“That instinct to check in before you even mentioned something was off 🤍”</p></div></div>
+        <div class="card"><div class="bg-fuchsia-300/30 backdrop-blur-xl border border-fuchsia-400/60 p-8 rounded-3xl shadow-2xl max-w-sm text-center text-fuchsia-900"><i data-lucide="crown" class="w-8 h-8 text-amber-400 mx-auto mb-6 opacity-80"></i><p class="text-2xl font-hand text-stone-700">“ No matter what anyone says your forehead is beautiful ”</p></div></div>
+        <div class="card"><div class="bg-gradient-to-br from-pink-200/40 via-rose-200/30 to-fuchsia-200/40 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-2xl max-w-sm text-center text-rose-900"><i data-lucide="armchair" class="w-8 h-8 text-stone-400 mx-auto mb-6 opacity-80"></i><p class="text-2xl font-hand text-stone-700">“ You matter to me more than you know. ”</p></div></div>
+        <div class="card"><div class="bg-white/40 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-xl max-w-sm text-center"><i data-lucide="thermometer" class="w-8 h-8 text-red-300 mx-auto mb-6 opacity-80"></i><p class="text-2xl font-hand text-stone-700">“Silly nicknames that became part of normal conversations 😄”</p></div></div>
+        <div class="card"><div class="bg-white/40 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-xl max-w-sm text-center"><i data-lucide="activity" class="w-8 h-8 text-rose-400 mx-auto mb-6 opacity-80"></i><p class="text-2xl font-hand text-stone-700">“Funny, unplanned moments that still make me smile 😅”</p></div></div>
+        <div class="card"><div class="bg-white/40 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-xl max-w-sm text-center"><i data-lucide="wifi" class="w-8 h-8 text-blue-300 mx-auto mb-6 opacity-80"></i><p class="text-2xl font-hand text-stone-700">“ “I’m really grateful for you.””</p></div></div>
+        <div class="card"><div class="bg-white/40 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-xl max-w-sm text-center"><i data-lucide="footprints" class="w-8 h-8 text-orange-300 mx-auto mb-6 opacity-80"></i><p class="text-2xl font-hand text-stone-700">“Trying to help out in small ways when days were heavy 🧩”</p></div></div>
+        <div class="card"><div class="bg-white/40 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-xl max-w-sm text-center"><i data-lucide="message-circle-heart" class="w-8 h-8 text-pink-400 mx-auto mb-6 opacity-80"></i><p class="text-2xl font-hand text-stone-700">“Another year older, and still deserving of all good things 🎂”</p></div></div>
+        <div class="card"><div class="bg-white/40 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-xl max-w-sm text-center"><i data-lucide="paw-print" class="w-8 h-8 text-stone-400 mx-auto mb-6 opacity-80"></i><p class="text-2xl font-hand text-stone-700">“The kind of memories that just make you smile quietly 🤍”</p></div></div>
+        <div class="card"><div class="bg-white/40 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-xl max-w-sm text-center"><i data-lucide="heart" class="w-8 h-8 text-red-400 mx-auto mb-6 opacity-80 fill-red-100"></i><p class="text-2xl font-hand text-stone-700">“Good conversations that turned into good memories 💬”</p></div></div>
+        <div class="card"><div class="bg-white/40 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-xl max-w-sm text-center"><i data-lucide="umbrella" class="w-8 h-8 text-teal-300 mx-auto mb-6 opacity-80"></i><p class="text-2xl font-hand text-stone-700">“Trying to give you my best during those difficult days 🩷”</p></div></div>
+        <!-- <div class="card"><div class="bg-white/40 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-xl max-w-sm text-center"><i data-lucide="gift" class="w-8 h-8 text-purple-300 mx-auto mb-6 opacity-80"></i><p class="text-2xl font-hand text-stone-700">“Wishing you a day filled with calm, smiles, and good vibes ✨”</p></div></div> -->
+        <!-- <div class="card"><div class="bg-white/40 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-xl max-w-sm text-center"><i data-lucide="cake" class="w-8 h-8 text-pink-400 mx-auto mb-6 opacity-80"></i><p class="text-2xl font-hand text-stone-700">“The cutest birthday messages that felt more special than gifts 🎂✨”</p></div></div> -->
+
+        <!-- <div class="card"><div class="w-full max-w-lg mx-auto flex flex-col h-[70vh]"><div class="text-center mb-4"><h2 class="text-lg font-sans font-medium text-stone-500">Your birthday message 💌</h2></div><div class="flex-1 bg-white/60 backdrop-blur-xl rounded-2xl p-6 overflow-y-auto no-scrollbar"><p class="text-base text-stone-700 leading-loose">“Happy birthday 🎂🎂🎉🎉 🎂 chimpanzee 🐒... u are the best bndr i have 😂❤️💕U are a little princess .U know what you are the best person ,you always helped me ,always cared for me ❤️❤️...talking to you feels like heaven 💖🎀..mujhe lagta tha tu insan hai but I was wrong u are a doggieee . Hainaaa?(In the era of 🐍I got 🐕) ... 😂😹 U are sooo perfect ✨✨..❤️tu real life pookie hai 😂 Chlo Happy birthday 🎂 ab thoda khush ho jaoo orr bday hai aapka 😂”</p></div></div></div> -->
+
+        <!-- <div class="card"><div class="w-full max-w-lg mx-auto flex flex-col h-[70vh]"><div class="text-center mb-4"><h2 class="text-lg font-sans font-medium text-stone-500">My birthday message to you 🎀</h2></div><div class="flex-1 bg-rose-50/60 backdrop-blur-xl rounded-2xl p-6 overflow-y-auto no-scrollbar"><p class="text-base text-stone-700 leading-loose">“HappyBirthday  🎀.U re the besttt friend I have found in my life and ik will never be able to get such a great friend ever . I never wanna loose you in my life. U re like a precious diomond in my life. U don't know how much precious u re for me.”</p></div></div></div> -->
+
+                    <!--CHANGE THISS-->
+
+        <div class="card"><div class="bg-white/40 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-xl max-w-sm text-center"><i data-lucide="shield-check" class="w-10 h-10 text-emerald-400 mx-auto mb-6 opacity-80"></i><p class="text-2xl font-hand text-stone-700">“One quiet truth — I always chose you. Even when it meant standing against everyone 🛡️🤍”</p></div></div>
+
+        <div class="card">
+            <div class="w-full max-w-4xl mx-auto flex flex-col items-center px-4">
+                <h2 class="text-2xl font-hand text-stone-700 mb-6 tracking-wide">Moments we can see 📸</h2>
+                <div class="photo-scroll-container w-full z-[60] relative">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+                        <div class="aspect-[4/5] bg-white/40 rounded-2xl border-2 border-dashed border-rose-200 overflow-hidden shadow-sm"><img src="photo1.jpg" class="w-full h-full object-cover" /></div>
+                        <div class="aspect-[4/5] bg-white/40 rounded-2xl border-2 border-dashed border-purple-200 overflow-hidden shadow-sm"><img src="PHOTO2.jpg" class="w-full h-full object-cover" /></div>
+                        <div class="aspect-[4/5] bg-white/40 rounded-2xl border-2 border-dashed border-blue-200 overflow-hidden shadow-sm"><img src="photo3.jpg" class="w-full h-full object-cover" /></div>
+                    </div>
+                    <p class="text-center text-stone-400 text-[10px] mt-4 font-sans uppercase tracking-widest md:hidden">Scroll down to see all ↑</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">  
+            <div class="bg-white/40 backdrop-blur-xl border border-white/50 p-8 rounded-3xl shadow-xl max-w-sm text-center">
+                <i data-lucide="pen-tool" class="w-8 h-8 text-rose-300 mx-auto mb-6 opacity-80"></i>
+                <h3 class="text-xl font-sans font-medium text-stone-800 mb-4">Special note for you</h3>
+                <p class="text-2xl font-hand text-stone-700">“Starting This year also </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="max-w-lg px-8 text-center space-y-8">
+                <div class="w-16 h-16 bg-white/50 rounded-full mx-auto flex items-center justify-center mb-4 shadow-lg animate-float">
+                    <i data-lucide="sparkles" class="w-8 h-8 text-rose-400"></i>
+                </div>
+                <p class="text-xl md:text-2xl font-hand text-stone-700 leading-relaxed">“Thank you for being a positive part of last year and making many moments better — wishing you a great year ahead.”</p>
+                <div class="pt-4"><p class="text-sm font-sans text-stone-400 tracking-widest uppercase opacity-70">Always here if u need!. <3 </p></div>
+            </div>
+        </div>
+        
+    </main>
+
+    <script>
+        const musicStartTime = 5; 
+        lucide.createIcons();
+
+        let currentCardIndex = 0;
+        const cards = document.querySelectorAll('.card');
+        const progressBar = document.getElementById('progress');
+        const clickArea = document.getElementById('click-area');
+        const restartContainer = document.getElementById('restart-container');
+        
+        const music = document.getElementById('bg-music');
+        const musicToggle = document.getElementById('music-toggle');
+        const musicIcon = document.getElementById('music-icon');
+        let isPlaying = false;
+
+        music.volume = 0.3;
+
+        window.addEventListener('load', () => {
+            music.currentTime = musicStartTime;
+            // Attempt autoplay
+            music.play().then(() => { isPlaying = true; }).catch(() => {});
+        });
+
+        musicToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            if (isPlaying) music.pause(); else music.play();
+            isPlaying = !isPlaying;
+            musicIcon.setAttribute('data-lucide', isPlaying ? 'music' : 'volume-x');
+            lucide.createIcons();
+        });
+
+        function nextCard() {
+            if (currentCardIndex >= cards.length - 1) return;
+
+            // Ensure music starts on first click if autoplay failed
+            if(!isPlaying && currentCardIndex === 0) {
+                music.currentTime = musicStartTime;
+                music.play();
+                isPlaying = true;
+            }
+
+            const currentCard = cards[currentCardIndex];
+            currentCard.classList.add('exit-anim');
+            currentCard.classList.remove('active');
+
+            currentCardIndex++;
+            cards[currentCardIndex].classList.add('active');
+            
+            setTimeout(() => {
+                currentCard.classList.remove('exit-anim');
+            }, 1500);
+
+            const progress = (currentCardIndex / (cards.length - 1)) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            if(currentCardIndex === cards.length - 1) {
+                triggerConfetti();
+                setTimeout(() => { restartContainer.classList.remove('hidden'); }, 1000);
+            }
+        }
+
+        // RESTART LOGIC
+        document.getElementById('restart-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            restartContainer.classList.add('hidden');
+            cards.forEach(card => card.classList.remove('active', 'exit-anim'));
+            currentCardIndex = 0;
+            cards[0].classList.add('active');
+            progressBar.style.width = '0%';
+            music.currentTime = musicStartTime;
+        });
+
+        function triggerConfetti() {
+            const duration = 3000;
+            const end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#FDA4AF', '#F9A8D4'] });
+                confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#FDA4AF', '#F9A8D4'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+
+        clickArea.addEventListener('click', nextCard);
+
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const emojis = ['❤️', '💖', '✨', '🌹','🎂'];
+            setInterval(() => {
+                const p = document.createElement('div');
+                p.classList.add('particle');
+                p.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                p.style.left = `${Math.random() * 100}vw`;
+                p.style.animationDuration = `${Math.random() * 5 + 7}s`;
+                container.appendChild(p);
+                setTimeout(() => p.remove(), 10000);
+            }, 800);
+        }
+        createParticles();
+    </script>
+</body>
+</html>
